@@ -297,6 +297,178 @@ try
         Check(rejected,
             "Imagem incompleta não foi rejeitada.");
     });
+
+    // Testes adicionais da recuperação por FAT residual.
+    string fragmentedDeleted = Path.Combine(
+        baseDir, "exfat_fragmentacao_excluida.img");
+
+    string fragmentedManifest = Path.Combine(
+        baseDir, "gabarito_fragmentacao.json");
+
+    const string fragmentedPath =
+        "FRAGMENTACAO_LAB/arquivo_fragmentado.bin";
+
+    (ExFatBootInfo Boot, ExFatDeletedItem Item)
+        LoadFragmentedCase()
+    {
+        Check(File.Exists(fragmentedDeleted),
+            "Imagem fragmentada excluída não encontrada.");
+
+        var boot = ExFatBootSectorReader.ReadMbrImage(
+            fragmentedDeleted);
+
+        var scan = ExFatDeletedEntryScanner.Scan(
+            fragmentedDeleted, boot);
+
+        var candidates = scan.Items.Where(x =>
+            !x.IsDirectory &&
+            x.Path == fragmentedPath).ToArray();
+
+        Check(candidates.Length == 1,
+            "Esperada exatamente uma entrada excluída.");
+
+        Check(!candidates[0].NoFatChain,
+            "O arquivo não possui cadeia FAT.");
+
+        return (boot, candidates[0]);
+    }
+
+    Run("FAT residual: recuperar arquivo fragmentado", () =>
+    {
+        var (boot, item) = LoadFragmentedCase();
+
+        string output = Path.Combine(
+            temp, "fat_residual_ok.bin");
+
+        var result = ExFatResidualFatRecovery.Recover(
+            fragmentedDeleted, boot, item, output);
+
+        Check(result.ClusterCount == 4096,
+            "Quantidade de clusters incorreta.");
+
+        Check(result.ExtentCount == 13,
+            "Quantidade de extensões incorreta.");
+
+        Check(File.Exists(fragmentedManifest),
+            "Gabarito de fragmentação não encontrado.");
+
+        using var document = JsonDocument.Parse(
+            File.ReadAllText(fragmentedManifest));
+
+        long expectedSize = document.RootElement
+            .GetProperty("size").GetInt64();
+
+        string expectedHash = document.RootElement
+            .GetProperty("sha256").GetString()!;
+
+        Check(new FileInfo(output).Length == expectedSize,
+            "Tamanho recuperado incorreto.");
+
+        using var recovered = File.OpenRead(output);
+
+        string actualHash = Convert.ToHexString(
+            SHA256.HashData(recovered)).ToLowerInvariant();
+
+        Check(string.Equals(
+            actualHash, expectedHash,
+            StringComparison.OrdinalIgnoreCase),
+            "SHA-256 do arquivo fragmentado divergente.");
+    });
+
+    Run("FAT residual: recusar cadeia interrompida", () =>
+    {
+        var (boot, item) = LoadFragmentedCase();
+
+        // Alterar somente uma cópia temporária.
+        string corrupted = Path.Combine(
+            temp, "fat_interrompida.img");
+
+        File.Copy(fragmentedDeleted, corrupted);
+
+        long fatPosition = checked(
+            boot.FatAbsoluteOffset +
+            (long)item.FirstCluster * 4);
+
+        using (var file = new FileStream(
+            corrupted,
+            FileMode.Open,
+            FileAccess.Write,
+            FileShare.None))
+        {
+            file.Position = fatPosition;
+            file.Write(new byte[4]);
+        }
+
+        string output = Path.Combine(
+            temp, "fat_interrompida_saida.bin");
+
+        bool refused = false;
+
+        try
+        {
+            ExFatResidualFatRecovery.Recover(
+                corrupted, boot, item, output);
+        }
+        catch (InvalidDataException)
+        {
+            refused = true;
+        }
+
+        Check(refused,
+            "A cadeia FAT interrompida não foi recusada.");
+
+        Check(!File.Exists(output),
+            "Foi criado um arquivo após a recusa.");
+    });
+
+    Run("FAT residual: recusar cluster ocupado", () =>
+    {
+        var (boot, item) = LoadFragmentedCase();
+
+        var active = ExFatDirectoryReader.ReadTree(
+            fragmentedDeleted, boot);
+
+        var occupiedFile = active.FirstOrDefault(x =>
+            !x.IsDirectory &&
+            x.LengthBytes > 0 &&
+            x.FirstCluster >= 2)
+            ?? throw new Exception(
+                "Arquivo ativo não encontrado.");
+
+        // Simular metadados excluídos que apontam
+        // para um cluster atualmente ocupado.
+        var suspicious = item with
+        {
+            FirstCluster = occupiedFile.FirstCluster
+        };
+
+        string output = Path.Combine(
+            temp, "cluster_ocupado_saida.bin");
+
+        bool refused = false;
+
+        try
+        {
+            ExFatResidualFatRecovery.Recover(
+                fragmentedDeleted,
+                boot,
+                suspicious,
+                output);
+        }
+        catch (InvalidDataException ex)
+        {
+            refused = ex.Message.Contains(
+                "ocupado",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        Check(refused,
+            "Cluster ocupado não foi recusado corretamente.");
+
+        Check(!File.Exists(output),
+            "Foi criado um arquivo após a recusa.");
+    });
+
 }
 catch (Exception ex)
 {

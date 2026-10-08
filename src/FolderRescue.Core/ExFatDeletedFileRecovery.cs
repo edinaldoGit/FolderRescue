@@ -176,7 +176,7 @@ public static class ExFatDeletedFileRecovery
         }
     }
 
-    private static byte[] ReadAllocationBitmap(
+    internal static byte[] ReadAllocationBitmap(
         FileStream image,
         ExFatBootInfo boot)
     {
