@@ -16,6 +16,48 @@ public partial class MainWindow : Window
     }
 
 
+
+    private async void AnalisarImagem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        var files = await StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "Selecionar imagem de disco",
+                AllowMultiple = false
+            });
+
+        if (files.Count == 0)
+            return;
+
+        try
+        {
+            string path = files[0].Path.LocalPath;
+
+            var result =
+                await DiskImageInspector.InspectAsync(path);
+
+            var scan =
+                await PartitionTableInspector.InspectAsync(path);
+
+            string details = scan.Partitions.Count == 0
+                ? "Nenhuma partição MBR encontrada"
+                : string.Join("; ", scan.Partitions.Select(p =>
+                    $"P{p.Number}: {p.FileSystem}, " +
+                    $"offset {p.OffsetBytes} bytes"));
+
+            StatusTexto.Text =
+                $"Imagem: {Path.GetFileName(path)} | " +
+                $"Tabela: {scan.Scheme} | {details}";
+        }
+        catch (Exception ex)
+        {
+            StatusTexto.Text =
+                $"Erro na análise: {ex.Message}";
+        }
+    }
+
     private async void AtualizarDispositivos_Click(
         object? sender,
         RoutedEventArgs e)

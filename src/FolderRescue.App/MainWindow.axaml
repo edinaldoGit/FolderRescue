@@ -36,7 +36,7 @@
 
             <StackPanel Spacing="8">
 
-                <Grid ColumnDefinitions="*,Auto">
+                <Grid ColumnDefinitions="*,Auto,Auto">
                     <TextBlock Text="Dispositivos detectados"
                                FontWeight="Bold"
                                Foreground="White"
@@ -46,6 +46,11 @@
                             x:Name="AtualizarDispositivosButton"
                             Content="Atualizar discos"
                             Click="AtualizarDispositivos_Click"/>
+
+                    <Button Grid.Column="2"
+                            Content="Analisar imagem"
+                            Margin="8,0,0,0"
+                            Click="AnalisarImagem_Click"/>
                 </Grid>
 
                 <ListBox x:Name="DispositivosList"
