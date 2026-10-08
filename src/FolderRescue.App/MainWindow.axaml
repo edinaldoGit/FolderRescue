@@ -1,0 +1,141 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="FolderRescue.App.MainWindow"
+        Title="FolderRescue"
+        Width="960"
+        Height="640"
+        MinWidth="760"
+        MinHeight="550"
+        Background="#0F172A">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+        <!-- Cabeçalho -->
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="FolderRescue"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       Foreground="#F8FAFC"/>
+
+            <TextBlock Text="Recuperação de arquivos e pastas"
+                       FontSize="14"
+                       Foreground="#94A3B8"/>
+
+            <TextBlock Text="Protótipo: navegação em pastas visíveis"
+                       Foreground="#38BDF8"
+                       FontSize="12"/>
+        </StackPanel>
+
+        <!-- Conteúdo principal -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,*"
+              Margin="0,24,0,24">
+
+            <!-- Origem -->
+            <Border Grid.Column="0"
+                    Background="#1E293B"
+                    CornerRadius="12"
+                    Padding="20"
+                    Margin="0,0,9,0">
+
+                <StackPanel Spacing="14">
+
+                    <TextBlock Text="1. Origem"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+
+                    <TextBlock Text="Selecione uma pasta de teste."
+                               Foreground="#CBD5E1"/>
+
+                    <Button Content="Selecionar pasta"
+                            Click="SelecionarOrigem_Click"
+                            HorizontalAlignment="Stretch"/>
+
+                    <TextBlock x:Name="OrigemTexto"
+                               Text="Nenhuma pasta selecionada"
+                               TextWrapping="Wrap"
+                               Foreground="#94A3B8"/>
+
+                    <TextBlock Text="Subpastas encontradas"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Margin="0,12,0,0"/>
+
+                    <ListBox x:Name="PastasList"
+                             Height="150"
+                             SelectionMode="Multiple"/>
+
+                    <TextBlock Text="Seleção múltipla habilitada"
+                               FontSize="12"
+                               Foreground="#94A3B8"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Destino -->
+            <Border Grid.Column="1"
+                    Background="#1E293B"
+                    CornerRadius="12"
+                    Padding="20"
+                    Margin="9,0,0,0">
+
+                <StackPanel Spacing="14">
+
+                    <TextBlock Text="2. Destino"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="White"/>
+
+                    <TextBlock Text="Escolha onde os arquivos serão salvos."
+                               Foreground="#CBD5E1"
+                               TextWrapping="Wrap"/>
+
+                    <Button Content="Selecionar destino"
+                            Click="SelecionarDestino_Click"
+                            HorizontalAlignment="Stretch"/>
+
+                    <TextBlock x:Name="DestinoTexto"
+                               Text="Nenhum destino selecionado"
+                               TextWrapping="Wrap"
+                               Foreground="#94A3B8"/>
+
+                    <Border Background="#334155"
+                            CornerRadius="8"
+                            Padding="14"
+                            Margin="0,18,0,0">
+
+                        <StackPanel Spacing="10">
+
+                            <TextBlock Text="Recuperação"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"/>
+
+                            <TextBlock Text="O mecanismo de recuperação será implementado nas próximas etapas."
+                                       TextWrapping="Wrap"
+                                       Foreground="#CBD5E1"/>
+
+                            <Button Content="Recuperar arquivos"
+                                    IsEnabled="False"
+                                    HorizontalAlignment="Stretch"/>
+
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Status -->
+        <Border Grid.Row="2"
+                Background="#1E293B"
+                CornerRadius="8"
+                Padding="14">
+
+            <TextBlock x:Name="StatusTexto"
+                       Text="Pronto para selecionar uma pasta de teste."
+                       Foreground="#CBD5E1"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+    </Grid>
+</Window>

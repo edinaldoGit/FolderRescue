@@ -1,0 +1,77 @@
+using System;
+using System.IO;
+using System.Linq;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
+
+namespace FolderRescue.App;
+
+public partial class MainWindow : Window
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    private async void SelecionarOrigem_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        var pastas = await StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions
+            {
+                Title = "Selecionar pasta de teste",
+                AllowMultiple = false
+            });
+
+        if (pastas.Count == 0)
+            return;
+
+        var caminho = pastas[0].Path.LocalPath;
+
+        OrigemTexto.Text = caminho;
+        PastasList.ItemsSource = null;
+
+        try
+        {
+            var nomes = Directory
+                .EnumerateDirectories(caminho)
+                .Select(p => Path.GetFileName(p))
+                .OrderBy(p => p)
+                .ToArray();
+
+            PastasList.ItemsSource = nomes;
+
+            StatusTexto.Text =
+                $"{nomes.Length} subpastas visíveis encontradas.";
+        }
+        catch (Exception ex) when (
+            ex is IOException ||
+            ex is UnauthorizedAccessException)
+        {
+            StatusTexto.Text =
+                $"Não foi possível listar as pastas: {ex.Message}";
+        }
+    }
+
+    private async void SelecionarDestino_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        var pastas = await StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions
+            {
+                Title = "Selecionar destino",
+                AllowMultiple = false
+            });
+
+        if (pastas.Count == 0)
+            return;
+
+        DestinoTexto.Text = pastas[0].Path.LocalPath;
+
+        StatusTexto.Text =
+            "Destino selecionado. Nenhum arquivo foi gravado.";
+    }
+}
