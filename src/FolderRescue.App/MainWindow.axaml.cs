@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using FolderRescue.Core;
 
 namespace FolderRescue.App;
 
@@ -12,6 +13,33 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+    }
+
+
+    private async void AtualizarDispositivos_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        AtualizarDispositivosButton.IsEnabled = false;
+
+        try
+        {
+            var devices = await DeviceDiscovery.ListAsync();
+
+            DispositivosList.ItemsSource = devices;
+
+            StatusTexto.Text =
+                $"{devices.Count} disco(s) físico(s) encontrado(s).";
+        }
+        catch (Exception ex)
+        {
+            StatusTexto.Text =
+                $"Erro ao identificar discos: {ex.Message}";
+        }
+        finally
+        {
+            AtualizarDispositivosButton.IsEnabled = true;
+        }
     }
 
     private async void SelecionarOrigem_Click(

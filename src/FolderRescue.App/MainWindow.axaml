@@ -3,12 +3,12 @@
         x:Class="FolderRescue.App.MainWindow"
         Title="FolderRescue"
         Width="960"
-        Height="640"
+        Height="720"
         MinWidth="760"
-        MinHeight="550"
+        MinHeight="620"
         Background="#0F172A">
 
-    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
 
         <!-- Cabeçalho -->
         <StackPanel Grid.Row="0" Spacing="6">
@@ -26,8 +26,39 @@
                        FontSize="12"/>
         </StackPanel>
 
+        
+        <!-- Dispositivos físicos -->
+        <Border Grid.Row="1"
+                Background="#1E293B"
+                CornerRadius="12"
+                Padding="12"
+                Margin="0,12,0,0">
+
+            <StackPanel Spacing="8">
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Dispositivos detectados"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1"
+                            x:Name="AtualizarDispositivosButton"
+                            Content="Atualizar discos"
+                            Click="AtualizarDispositivos_Click"/>
+                </Grid>
+
+                <ListBox x:Name="DispositivosList"
+                         Height="80"/>
+
+                <TextBlock Text="Consulta informativa. Nenhum disco é modificado."
+                           FontSize="11"
+                           Foreground="#94A3B8"/>
+            </StackPanel>
+        </Border>
+
         <!-- Conteúdo principal -->
-        <Grid Grid.Row="1"
+        <Grid Grid.Row="2"
               ColumnDefinitions="*,*"
               Margin="0,24,0,24">
 
@@ -38,7 +69,7 @@
                     Padding="20"
                     Margin="0,0,9,0">
 
-                <StackPanel Spacing="14">
+                <StackPanel Spacing="10">
 
                     <TextBlock Text="1. Origem"
                                FontSize="20"
@@ -63,7 +94,7 @@
                                Margin="0,12,0,0"/>
 
                     <ListBox x:Name="PastasList"
-                             Height="150"
+                             Height="110"
                              SelectionMode="Multiple"/>
 
                     <TextBlock Text="Seleção múltipla habilitada"
@@ -79,7 +110,7 @@
                     Padding="20"
                     Margin="9,0,0,0">
 
-                <StackPanel Spacing="14">
+                <StackPanel Spacing="10">
 
                     <TextBlock Text="2. Destino"
                                FontSize="20"
@@ -126,7 +157,7 @@
         </Grid>
 
         <!-- Status -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 Background="#1E293B"
                 CornerRadius="8"
                 Padding="14">
