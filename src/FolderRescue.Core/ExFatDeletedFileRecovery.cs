@@ -251,6 +251,7 @@ public static class ExFatDeletedFileRecovery
         uint current = bitmapCluster;
         int written = 0;
         var visited = new HashSet<uint>();
+        Span<byte> fatEntry = stackalloc byte[4];
 
         while (written < bitmap.Length)
         {
@@ -295,7 +296,6 @@ public static class ExFatDeletedFileRecovery
                 throw new InvalidDataException(
                     "FAT do bitmap fora dos limites.");
 
-            Span<byte> fatEntry = stackalloc byte[4];
             image.Position = fatPosition;
             image.ReadExactly(fatEntry);
 
